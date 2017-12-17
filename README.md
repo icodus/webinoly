@@ -9,7 +9,7 @@ With Webinoly you can set up your web server in just one step.
 ### Requirements
 * Ubuntu 16.04
 
-Please, [visit and use original Webinoly](https://github.com/QROkes/webinoly).
+Please visit and use [original Webinoly](https://github.com/QROkes/webinoly).
 
 #License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
