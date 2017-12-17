@@ -124,6 +124,13 @@ nginx_install() {
 	messagend_install
 }
 
+wp_cli_install(){
+
+	sudo curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+	sudo chmod +x wp-cli.phar
+	sudo mv wp-cli.phar /usr/local/bin/wp
+}
+
 
 php_install() {
 	if [[ -n $(conf_read php-ver) && ($(conf_read php-ver) == "7.1" || $(conf_read php-ver) == "7.0" || $(conf_read php-ver) == "5.6") ]]; then
@@ -141,6 +148,8 @@ php_install() {
 	
 	sudo cp /etc/php/$(conf_read php-ver)/fpm/php.ini /opt/webinoly/templates/source/
 	sudo cp /etc/php/$(conf_read php-ver)/fpm/pool.d/www.conf /opt/webinoly/templates/source/
+	
+	wp_cli_install
 	
 	conf_write php true
 	messagend_install
