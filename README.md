@@ -6,6 +6,16 @@ Linux Ubuntu + Nginx + MySQL (MariaDB) + PHP is one of the most reliable configu
 
 With Webinoly you can set up your web server in just one step.
 
+## Usage
+
+```bash
+# Install Webinoly and LEMP
+wget -qO weby qrok.es/wy && sudo bash weby 3
+
+# Create your first site.
+sudo site example.com -wp
+```
+
 ### Requirements
 * Ubuntu 16.04
 
