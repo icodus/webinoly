@@ -10,7 +10,7 @@ With Webinoly you can set up your web server in just one step.
 
 ```bash
 # Install Webinoly and LEMP
-wget -qO weby qrok.es/wy && sudo bash weby 3
+wget -qO https://raw.githubusercontent.com/icodus/webinoly-custom/master/weby && sudo bash weby 3
 
 # Create your first site.
 sudo site example.com -wp
