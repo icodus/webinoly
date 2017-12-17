@@ -21,6 +21,7 @@ nginx_helper_plugin() {
 
 wpinstall() {
 	local AUTOGENPASS_WPDB=`pwgen -s -1`
+	local AUTOGENPASS_WPADMIN=`pwgen -s -1`
 	local dom=${domain//./_}
 	local setupmysql="y"
 	local setupwp="y"
@@ -28,21 +29,24 @@ wpinstall() {
 	local dbname=$dom
 	local dbuser=$dom
 	local dbpass=$AUTOGENPASS_WPDB
+	local adminpass=$AUTOGENPASS_WPADMIN
 	local dbpref="wp_"
+	local dbpref="wp_"
+	local wp_noauto="[2]"
 	
 	echo "${blu}"
-	if [[ $wp != [2] ]]; then
-		echo "Do you need to setup new MySQL database? [Y/n]"
-		while read -r -n 1 -s setupmysql; do
-			  setupmysql=${setupmysql:-y}
-			  [[ $setupmysql = [YyNn] ]] && break
-		done
-		echo "Create WP-Config file automatically? [Y/n]"
-		while read -r -n 1 -s setupwp; do
-			  setupwp=${setupwp:-y}
-			  [[ $setupwp = [YyNn] ]] && break
-		done
-	fi
+	# if [[ $wp_dummy != [2] ]]; then
+	# 	echo "Do you need to setup new MySQL database? [Y/n]"
+	# 	while read -r -n 1 -s setupmysql; do
+	# 		  setupmysql=${setupmysql:-y}
+	# 		  [[ $setupmysql = [YyNn] ]] && break
+	# 	done
+	# 	echo "Create WP-Config file automatically? [Y/n]"
+	# 	while read -r -n 1 -s setupwp; do
+	# 		  setupwp=${setupwp:-y}
+	# 		  [[ $setupwp = [YyNn] ]] && break
+	# 	done
+	# fi
 	
 	# Download WP (latest version)
 	sudo wget --timeout=15 -qrO /var/www/$domain/htdocs/wp.tar.gz https://wordpress.org/latest.tar.gz
@@ -244,7 +248,7 @@ _EOF_
 		local dpath=/var/www/${domain}/htdocs
 		local durl=http://${domain}/
 		
-		wp --allow-root core install --url="$durl" --path="$dpath" --title="Sevretec" --admin_user="xghcvp_user" --admin_password="xcjkovp_assword" --admin_email="dsgnvictor@gmail.com"
+		wp --allow-root core install --url="$durl" --path="$dpath" --title="Sevretec" --admin_user="$dbuser" --admin_password="$adminpass" --admin_email="admin@sitez.com"
 
 	fi
 	
