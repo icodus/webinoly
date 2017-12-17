@@ -239,6 +239,13 @@ _EOF_
 			sudo sed -i "/stop editing/i \#define('SUBDOMAIN_INSTALL', true);" /var/www/$domain/wp-config.php
 			sudo sed -i "/server_name /c \	server_name $domain *.$domain;" /etc/nginx/sites-available/$domain
 		fi
+		
+		cp /var/www/$domain/wp-config.php /var/www/$domain/htdocs/wp-config.php
+		local dpath=/var/www/${domain}/htdocs
+		local durl=http://${domain}/
+		
+		wp --allow-root core install --url="$durl" --path="$dpath" --title="Sevretec" --admin_user="xghcvp_user" --admin_password="xcjkovp_assword" --admin_email="dsgnvictor@gmail.com"
+
 	fi
 	
 }
