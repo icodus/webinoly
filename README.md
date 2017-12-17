@@ -11,5 +11,5 @@ With Webinoly you can set up your web server in just one step.
 
 Please visit and use [original Webinoly](https://github.com/QROkes/webinoly).
 
-#License
+License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
