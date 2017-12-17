@@ -33,8 +33,9 @@ wpinstall() {
 	local dbpref="wp_"
 	local dbpref="wp_"
 	local wp_noauto="[2]"
+	echo "Installing Wordpress, please wait..."
 	
-	echo "${blu}"
+	#echo "${blu}"
 	# if [[ $wp_dummy != [2] ]]; then
 	# 	echo "Do you need to setup new MySQL database? [Y/n]"
 	# 	while read -r -n 1 -s setupmysql; do
@@ -63,7 +64,7 @@ wpinstall() {
 		do
 			done="1"
 			# Ask DB data or suggest default values
-			echo ""
+			#echo ""
 			#[[ $wp == [2] ]] || read -p "Database Host [localhost]:" dbhost
 			dbhost=${dbhost:-localhost}
 			
@@ -247,8 +248,12 @@ _EOF_
 		cp /var/www/$domain/wp-config.php /var/www/$domain/htdocs/wp-config.php
 		local dpath=/var/www/${domain}/htdocs
 		local durl=http://${domain}/
+		local allow_root="--allow-root"
+		if [[ $EUID -ne 0 ]]; then
+   			$allow_root=""
+		fi
 		
-		wp --allow-root core install --url="$durl" --path="$dpath" --title="Sevretec" --admin_user="$dbuser" --admin_password="$adminpass" --admin_email="admin@sitez.com"
+		wp $allow_root install --url="$durl" --path="$dpath" --title="Sevretec" --admin_user="$dbuser" --admin_password="$adminpass" --admin_email="admin@sitez.com"
 
 	fi
 	
