@@ -64,7 +64,7 @@ wpinstall() {
 			done="1"
 			# Ask DB data or suggest default values
 			echo ""
-			[[ $wp == [2] ]] || read -p "Database Host [localhost]:" dbhost
+			#[[ $wp == [2] ]] || read -p "Database Host [localhost]:" dbhost
 			dbhost=${dbhost:-localhost}
 			
 			if [[ $dbhost == "localhost" && ( "$setupmysql" == y || "$setupmysql" == Y ) && $(conf_read mysql) != "true" ]]; then
@@ -80,10 +80,10 @@ wpinstall() {
 					mysql_client_install > /dev/null 2>&1 &
 					echo "${gre}MySQL Client has been successfully installed!${end}"
 				fi
-				echo "${blu}"
-				read -p "External DB root username [root]: " dburoot
-				read -p "External DB root password: " dbproot
-				echo ""
+				#echo "${blu}"
+				#read -p "External DB root username [root]: " dburoot
+				#read -p "External DB root password: " dbproot
+				#echo ""
 				local dburoot=${dburoot:-root}
 				local dbproot=${dbproot:-nodefined}
 					
@@ -91,7 +91,7 @@ wpinstall() {
 				local dbport=$(echo "$dbhost" | cut -f 2 -d ':')
 			fi
 			
-			[[ $wp == [2] ]] || read -p "Database Name [$dom]:" dbname
+			#[[ $wp == [2] ]] || read -p "Database Name [$dom]:" dbname
 			dbname=${dbname:-$dom}
 				
 			# Check for duplicate database names, if already exists ask for another dbname to create the new db
@@ -146,10 +146,10 @@ wpinstall() {
 				done
 			fi
 			if [[ $wp != [2] ]]; then
-				read -p "Database User [$dom]:" dbuser
-				read -p "Database Password [$AUTOGENPASS_WPDB]:" dbpass
-				read -p "Database Prefix [wp_]:" dbpref
-				echo "${end}"
+				#read -p "Database User [$dom]:" dbuser
+				#read -p "Database Password [$AUTOGENPASS_WPDB]:" dbpass
+				#read -p "Database Prefix [wp_]:" dbpref
+				#echo "${end}"
 				
 				# If empty, assign defalut values
 				dbuser=${dbuser:-$dom}
