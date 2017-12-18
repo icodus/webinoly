@@ -248,13 +248,15 @@ _EOF_
 		cp /var/www/$domain/wp-config.php /var/www/$domain/htdocs/wp-config.php
 		local dpath=/var/www/${domain}/htdocs
 		local durl=http://${domain}/
-		local allow_root="--allow-root"
-		if [[ $EUID -ne 0 ]]; then
-   			$allow_root=""
-		fi
-		
-		wp $allow_root install --url="$durl" --path="$dpath" --title="Sevretec" --admin_user="$dbuser" --admin_password="$adminpass" --admin_email="admin@sitez.com"
 
+		local allow_root=""
+		if [[ "$EUID" -ne 0 ]]; then
+			local allow_root=""
+   		else
+   			local allow_root="--allow-root"
+		fi
+
+		wp core install "$allow_root" --url="$durl" --path="$dpath" --title="Made by Webinoly" --admin_user="$dbuser" --admin_password="$adminpass" --admin_email="admin@sitez.com"
 	fi
 	
 }
