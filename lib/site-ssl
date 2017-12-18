@@ -40,7 +40,8 @@ site_ssl_on() {
 		
 	# Generar nuevo certificado	
 	if [[ ! -a /etc/letsencrypt/live/$domain/fullchain.pem ]]; then
-		sudo letsencrypt certonly --webroot -w /var/www/$root/htdocs/ -d $domain -d www.$domain --email $cermail --agree-tos
+		#sudo letsencrypt certonly --webroot -w /var/www/$root/htdocs/ -d $domain -d www.$domain --email $cermail --agree-tos
+		sudo letsencrypt certonly --webroot -w /var/www/$root/htdocs/ -d $domain --email $cermail --agree-tos
 	fi
 	
 	# Configuracion NGINX del sitio para soportar SSL
