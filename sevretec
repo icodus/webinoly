@@ -27,6 +27,83 @@ conf_delete() {
 }
 
 
+php_optim() {
+	api-events_update ip3
+	[[ -n $1 ]] && ver="$1" || ver=$(conf_read php-ver)
+
+	if [[ -n $(conf_read max-mb-uploads) && $(conf_read max-mb-uploads) =~ ^[0-9]+$ ]]; then
+		local maxuploads=$(conf_read max-mb-uploads)
+	else
+		local maxuploads="100"
+	fi
+	
+	# Not needed anymore! https://serverfault.com/questions/627903/is-the-php-option-cgi-fix-pathinfo-really-dangerous-with-nginx-php-fpm
+	#sudo sed -i '/cgi.fix_pathinfo=/c\cgi.fix_pathinfo=0' /etc/php/$ver/fpm/php.ini
+	
+	sudo sed -i '/memory_limit =/c\memory_limit = 128M' /etc/php/$ver/fpm/php.ini
+	sudo sed -i '/max_execution_time =/c\max_execution_time = 300' /etc/php/$ver/fpm/php.ini
+	sudo sed -i '/expose_php =/c\expose_php = Off' /etc/php/$ver/fpm/php.ini
+	sudo sed -i "/upload_max_filesize =/c\upload_max_filesize = ${maxuploads}M" /etc/php/$ver/fpm/php.ini
+	sudo sed -i "/post_max_size =/c\post_max_size = ${maxuploads}M" /etc/php/$ver/fpm/php.ini
+	sudo sed -i '/max_file_uploads =/c\max_file_uploads = 20' /etc/php/$ver/fpm/php.ini
+	sudo sed -i '/session.cookie_httponly =/c\session.cookie_httponly = 1' /etc/php/$ver/fpm/php.ini
+	set_timezone php
+
+	sudo mkdir -p /var/log/php/$ver
+	sudo touch /var/log/php/$ver/fpm.log
+	sudo sed -i "/error_log =/c\error_log = /var/log/php/$ver/fpm.log" /etc/php/$ver/fpm/php-fpm.conf
+	sudo sed -i '/log_level =/c\log_level = notice' /etc/php/$ver/fpm/php-fpm.conf
+
+	sudo sed -i '/pm =/c\pm = ondemand' /etc/php/$ver/fpm/pool.d/www.conf
+	sudo sed -i '/request_terminate_timeout =/c\request_terminate_timeout = 300' /etc/php/$ver/fpm/pool.d/www.conf
+	sudo sed -i '/pm.max_spare_servers =/c\pm.max_spare_servers = 30' /etc/php/$ver/fpm/pool.d/www.conf
+	sudo sed -i '/pm.min_spare_servers =/c\pm.min_spare_servers = 10' /etc/php/$ver/fpm/pool.d/www.conf
+	sudo sed -i '/pm.start_servers =/c\pm.start_servers = 20' /etc/php/$ver/fpm/pool.d/www.conf
+	sudo sed -i '/pm.max_children =/c\pm.max_children = 100' /etc/php/$ver/fpm/pool.d/www.conf
+	sudo sed -i '/pm.max_requests =/c\pm.max_requests = 500' /etc/php/$ver/fpm/pool.d/www.conf
+	sudo sed -i '/pm.status_path =/c\pm.status_path = /status' /etc/php/$ver/fpm/pool.d/www.conf
+	sudo sed -i '/ping.path =/c\ping.path = /ping' /etc/php/$ver/fpm/pool.d/www.conf
+
+	if [[ $(conf_read multi-php) == "true" ]]; then
+		[[ $ver == 7.2 ]] && sudo sed -i '/listen = /c\listen = 127.0.0.1:9000' /etc/php/$ver/fpm/pool.d/www.conf
+		[[ $ver == 7.1 ]] && sudo sed -i '/listen = /c\listen = 127.0.0.1:9002' /etc/php/$ver/fpm/pool.d/www.conf
+		[[ $ver == 7.0 ]] && sudo sed -i '/listen = /c\listen = 127.0.0.1:9004' /etc/php/$ver/fpm/pool.d/www.conf
+		[[ $ver == 5.6 ]] && sudo sed -i '/listen = /c\listen = 127.0.0.1:9006' /etc/php/$ver/fpm/pool.d/www.conf
+	else
+		sudo sed -i '/listen = /c\listen = 127.0.0.1:9000' /etc/php/$ver/fpm/pool.d/www.conf
+	fi
+	
+	sudo touch /var/log/php/$ver/slow.log
+	sudo cp /etc/php/$ver/fpm/pool.d/www.conf /etc/php/$ver/fpm/pool.d/debug.conf
+	sudo sed -i '/\[www\]/c\[debug]' /etc/php/$ver/fpm/pool.d/debug.conf
+	sudo sed -i '/rlimit_core =/c\rlimit_core = unlimited' /etc/php/$ver/fpm/pool.d/debug.conf
+	sudo sed -i "/slowlog =/c\slowlog = /var/log/php/$ver/slow.log" /etc/php/$ver/fpm/pool.d/debug.conf
+	sudo sed -i '/request_slowlog_timeout =/c\request_slowlog_timeout = 10s' /etc/php/$ver/fpm/pool.d/debug.conf
+
+	if [[ $(conf_read multi-php) == "true" ]]; then
+		[[ $ver == 7.2 ]] && sudo sed -i '/listen = /c\listen = 127.0.0.1:9001' /etc/php/$ver/fpm/pool.d/debug.conf
+		[[ $ver == 7.1 ]] && sudo sed -i '/listen = /c\listen = 127.0.0.1:9003' /etc/php/$ver/fpm/pool.d/debug.conf
+		[[ $ver == 7.0 ]] && sudo sed -i '/listen = /c\listen = 127.0.0.1:9005' /etc/php/$ver/fpm/pool.d/debug.conf
+		[[ $ver == 5.6 ]] && sudo sed -i '/listen = /c\listen = 127.0.0.1:9007' /etc/php/$ver/fpm/pool.d/debug.conf
+	else
+		sudo sed -i '/listen = /c\listen = 127.0.0.1:9001' /etc/php/$ver/fpm/pool.d/debug.conf
+	fi
+	
+	if [[ -n $ver && ($ver == "7.2" || $ver == "7.1" || $ver == "7.0") ]]; then
+		# xdebug deprecated in 5.6
+		sudo echo 'php_admin_flag[xdebug.profiler_enable] = off' >> /etc/php/$ver/fpm/pool.d/debug.conf
+		sudo echo 'php_admin_flag[xdebug.profiler_enable_trigger] = on' >> /etc/php/$ver/fpm/pool.d/debug.conf
+		sudo echo 'php_admin_value[xdebug.profiler_output_name] = cachegrind.out.%p-%H-%R' >> /etc/php/$ver/fpm/pool.d/debug.conf
+		sudo echo 'php_admin_value[xdebug.profiler_output_dir] = /tmp/' >> /etc/php/$ver/fpm/pool.d/debug.conf 
+		sudo sed -i '/zend_extension=/c\;zend_extension=xdebug.so' /etc/php/$ver/mods-available/xdebug.ini
+	fi
+	
+	conf_write php-optim true
+	sudo service php*-fpm reload
+	api-events_update ip4
+}
+
+
 
 pre_install() {
 	sudo apt-get -qq update
@@ -152,3 +229,4 @@ _EOF_
 
 mysql_install
 php_install
+php_optim
