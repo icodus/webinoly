@@ -34,8 +34,8 @@ pre_install() {
 		# Check for missing essential packages
 		
 		api-events_update i1
-		sudo apt-get -y -qq install software-properties-common
-		sudo apt-get -y -qq install python-software-properties
+		#sudo apt-get -y -qq install software-properties-common
+		#sudo apt-get -y -qq install python-software-properties
 		sudo apt-get -y -qq install pwgen
 		sudo apt-get -y -qq install unzip
 		sudo apt-get -y -qq install zip
