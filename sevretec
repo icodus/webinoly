@@ -98,3 +98,5 @@ _EOF_
 	echo "${gre}MySQL has been installed successfully! ${end}"
 	api-events_update im4
 }
+
+mysql_install
