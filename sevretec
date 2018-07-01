@@ -58,6 +58,57 @@ pre_install() {
 	fi
 }
 
+php_install() {
+	api-events_update ip1
+	if [[ -n $(conf_read php-ver) && ($(conf_read php-ver) == "7.2" || $(conf_read php-ver) == "7.1" || $(conf_read php-ver) == "7.0" || $(conf_read php-ver) == "5.6") ]]; then
+		echo "${gre}Default PHP version '$(conf_read php-ver)' detected!${end}"
+	else
+		# Default PHP version
+		conf_write php-ver 7.2
+	fi
+	ver=$(conf_read php-ver)
+	
+	# Multi-PHP
+	if [[ $(conf_read multi-php) == "true" && -n $1 && $1 =~ ^(5.6|7.0|7.1|7.2)$ && $(conf_read php) == "true" && $1 != $ver ]]; then
+		ver="$1"
+		echo "${gre}Multi-PHP version is enabled. PHP '$ver' will be installed!${end}"
+	elif [[ $(conf_read multi-php) != "true" && -n $1 ]]; then
+		echo "${red}Multi-PHP is not enabled! ${end}"
+		exit 1
+	elif [[ $(conf_read multi-php) == "true" && -n $1 ]]; then
+		echo "${red}Please, enter a valid PHP version or default PHP is not installed yet! ${end}"
+		exit 1
+	fi
+	
+	if [[ $(conf_read php) != "true" ]]; then
+		# Fix ondrej issue - https://github.com/oerdnj/deb.sury.org/issues/56
+		sudo apt-get install -y language-pack-en-base
+		sudo LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
+	fi
+	pre_install
+	sudo apt-get -y install php${ver}-common php${ver}-cli php${ver}-fpm php${ver}-curl php${ver}-gd php${ver}-imap php${ver}-readline php${ver}-recode php${ver}-mysql php${ver}-mbstring php${ver}-bcmath php${ver}-mysql php${ver}-opcache php${ver}-zip php${ver}-xml php${ver}-soap php-imagick graphviz php-pear php-msgpack
+	
+	if [[ -n $ver && ($ver == "7.1" || $ver == "7.0" || $ver == "5.6") ]]; then
+		# mcrypt deprecated in 7.2
+		sudo apt-get -y install php${ver}-mcrypt
+	fi
+	if [[ -n $ver && ($ver == "7.2" || $ver == "7.1" || $ver == "7.0") ]]; then
+		# xdebug deprecated in 5.6
+		sudo apt-get -y install php-xdebug
+	fi
+	
+	def=$(conf_read php-ver)
+	if [[ $(conf_read php-v${def}) != "true" ]]; then
+		sudo cp /etc/php/$ver/fpm/php.ini /opt/webinoly/templates/source/
+		sudo cp /etc/php/$ver/fpm/pool.d/www.conf /opt/webinoly/templates/source/
+	fi
+	
+	conf_write php true
+	conf_write php-v$ver true
+	echo "${gre}PHP has been installed successfully! ${end}"
+	api-events_update ip2
+}
+
 
 mysql_install() {
 	api-events_update im1
@@ -100,3 +151,4 @@ _EOF_
 }
 
 mysql_install
+php_install
