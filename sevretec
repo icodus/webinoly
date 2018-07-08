@@ -227,6 +227,13 @@ _EOF_
 	api-events_update im4
 }
 
+
+main() {
 mysql_install
 php_install
 php_optim
+}
+
+main
+
+
